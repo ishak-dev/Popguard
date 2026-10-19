@@ -2,6 +2,8 @@
 
 A personal Chrome extension that stops shady streaming sites from opening ad and scam tabs every time you click "Play".
 
+<img src="screenshot.png" alt="PopGuard popup showing per-site toggles, recently blocked popups and ad scripts, and the list of protected sites" width="400">
+
 You turn it on per site. On a protected site it works in two layers:
 
 | Layer | Where it runs | What it does |
