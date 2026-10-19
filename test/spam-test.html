@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PopGuard test page</title>
+  <style>
+    body { font: 14px/1.5 system-ui, sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px; }
+    .player { position: relative; width: 100%; max-width: 640px; aspect-ratio: 16/9; background: #111; border-radius: 8px; }
+    .player video { width: 100%; height: 100%; display: block; }
+    .player button { position: absolute; inset: 0; margin: auto; width: 120px; height: 56px; font-size: 18px; cursor: pointer; }
+    .trap { position: absolute; inset: 0; z-index: 9999; opacity: 0; background: red; }
+    .tests button { margin: 4px 4px 4px 0; }
+    #log { background: #f3f3f3; padding: 8px 10px; border-radius: 6px; min-height: 60px; white-space: pre-wrap; font: 12px ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+  <h1>PopGuard test page</h1>
+  <p>Fake "spam streaming site". Every trap below opens <code>example.com</code> / <code>example.org</code> (harmless sites)
+     in the way real ad scripts do. Protect <code>localhost</code> with PopGuard and nothing should open.</p>
+
+  <h2>1. Player covered by an invisible ad link</h2>
+  <div class="player">
+    <video></video>
+    <button id="play">▶ Play</button>
+    <a class="trap" href="https://example.org/?invisible-overlay" target="_blank"></a>
+  </div>
+
+  <h2>1b. Embedded player iframe with a see-through layer on top (like filmoton.ba)</h2>
+  <div class="player">
+    <iframe id="embed" style="width:100%;height:100%;border:0" srcdoc="<body style='margin:0;background:#222;display:grid;place-items:center;height:100vh'><button style='font-size:18px;padding:12px 20px' onclick=&quot;parent.postMessage('embed-play','*')&quot;>&#9654; Play (iframe)</button></body>"></iframe>
+    <div id="ghost" style="position:absolute;inset:0;z-index:10;background:transparent"></div>
+  </div>
+
+  <h2>2. Other tricks</h2>
+  <div class="tests">
+    <button id="popunder">Popunder (window.open)</button>
+    <button id="blank">Blank popup, then redirect</button>
+    <button id="scripted">Scripted hidden link</button>
+    <button id="iframeOpen">window.open borrowed from a hidden blank iframe</button>
+    <button id="tabunder">Tab-under (opens copy, redirects this tab)</button>
+    <button id="notify">"Click Allow to continue"</button>
+  </div>
+
+  <h2>3. Must still work</h2>
+  <p><a href="spam-test.html?same-site" target="_blank">Same-site link in new tab</a> (should open)</p>
+
+  <h2>Log</h2>
+  <div id="log"></div>
+
+  <script>
+    const log = (msg) => { document.getElementById('log').textContent += msg + '\n'; };
+    const on = (id, fn) => document.getElementById(id).addEventListener('click', fn);
+
+    on('play', () => log('▶ Real play button clicked. Video would start.'));
+
+    // The ghost layer over the embedded player: each click opens an ad via a borrowed window.open.
+    addEventListener('message', (e) => { if (e.data === 'embed-play') log('▶ Embedded player clicked on the FIRST try.'); });
+    on('ghost', () => {
+      const f = document.createElement('iframe');
+      f.style.display = 'none';
+      document.body.append(f);
+      f.contentWindow.open('https://example.com/?ghost-layer', '_blank');
+      log('Ghost layer swallowed the click and opened an ad');
+    });
+
+    // Classic popunder: every click anywhere opens an ad.
+    on('popunder', () => {
+      const w = window.open('https://example.com/?popunder', '_blank');
+      log('window.open returned: ' + (w ? 'a window (ad script thinks it worked)' : 'null'));
+      window.focus();
+    });
+
+    on('blank', () => {
+      const w = window.open('');
+      w.location = 'https://example.com/?blank-then-redirect';
+      log('blank popup trick ran');
+    });
+
+    on('scripted', () => {
+      const a = document.createElement('a');
+      a.href = 'https://example.org/?scripted-link';
+      a.target = '_blank';
+      a.click();
+      log('scripted link trick ran');
+    });
+
+    on('iframeOpen', () => {
+      const f = document.createElement('iframe');
+      f.style.display = 'none';
+      document.body.append(f);
+      f.contentWindow.open('https://example.com/?iframe-open', '_blank');
+      log('iframe window.open trick ran');
+    });
+
+    on('tabunder', () => {
+      window.open(location.href.split('?')[0] + '?tab-under-copy', '_blank');
+      location.href = 'https://example.com/?tab-under';
+    });
+
+    on('notify', async () => {
+      const result = await Notification.requestPermission();
+      log('Notification permission answer: ' + result);
+    });
+  </script>
+</body>
+</html>

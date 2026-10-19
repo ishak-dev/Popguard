@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>PopGuard</h1>
+    <span id="total" class="muted"></span>
+  </header>
+
+  <section class="card" id="current">
+    <div id="host" class="host"></div>
+    <label class="toggle" id="toggleRow">
+      <span>Protect this site</span>
+      <input type="checkbox" id="toggle">
+      <span class="switch"></span>
+    </label>
+    <label class="toggle" id="scriptsRow">
+      <span>Block ad scripts from other sites</span>
+      <input type="checkbox" id="scripts">
+      <span class="switch"></span>
+    </label>
+    <div id="status" class="muted"></div>
+  </section>
+
+  <section>
+    <h2>Recently blocked</h2>
+    <ul id="recent" class="list"></ul>
+  </section>
+
+  <section>
+    <h2>Protected sites</h2>
+    <ul id="sites" class="list"></ul>
+  </section>
+
+  <script src="domain.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

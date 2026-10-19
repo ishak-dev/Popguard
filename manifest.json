@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "PopGuard",
+  "version": "1.0.0",
+  "description": "Stops shady sites from opening popup/popunder tabs, tab-under redirects and invisible click-hijacking overlays.",
+  "minimum_chrome_version": "120",
+  "permissions": ["webNavigation", "storage", "scripting", "declarativeNetRequest", "declarativeNetRequestFeedback"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "PopGuard",
+    "default_popup": "popup.html"
+  }
+}
